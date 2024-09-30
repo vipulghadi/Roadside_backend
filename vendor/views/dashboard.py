@@ -4,16 +4,15 @@ from rest_framework.generics import ListAPIView
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken  
 from rest_framework.permissions import AllowAny
-
-
+from django.http import Http404
 
 from SeeMe_be.utils import custom_response,validate_phone_number
 from SeeMe_be.otp import generate_otp,validate_otp
-from .serializers import *
+from vendor.serializers import *
 from SeeMe_be.pagination import PaginationSize20
 
 
-class VendorProfileListCreateView(ListAPIView):
+class VendorProfileListView(ListAPIView):
     serializer_class = VendorProfileSerializer
     pagination_class = PaginationSize20
       
@@ -42,9 +41,36 @@ class VendorProfileListCreateView(ListAPIView):
                     status=status.HTTP_200_OK
                 )
     
+class VendorShopTypeCreate(ListAPIView):
+    serializer_class = VendorShopTypeSerializer
+    pagination_class = PaginationSize20
+    
+    def get_queryset(self):
+        return VendorShopType.objects.all()
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page_param = self.request.query_params.get("page")
+        if page_param:
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return custom_response(
+                    success=True,
+                    data=self.get_paginated_response(serializer.data),
+                    status=status.HTTP_200_OK
+                )
+                
+                
+        serializer = self.get_serializer(queryset, many=True)
+        return  custom_response(
+                    success=True,
+                    data=self.get_paginated_response(serializer.data),
+                    status=status.HTTP_200_OK
+                )
+    
     def post(self, request, format=None):
-        request.data._mutable = True  
-        serializer = self.get_serializer(data=request.data)
+        serializer = VendorShopTypeSerializer(data=request.data)
         if serializer.is_valid():
             data=serializer.save()
             return custom_response(
@@ -58,30 +84,25 @@ class VendorProfileListCreateView(ListAPIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-
-class VendorProfileDetailView(APIView):
+class VendorShopTypeDetail(APIView):
     def get_object(self, pk):
         try:
-            return VendorProfile.objects.get(pk=pk, is_deleted=False)
-        except VendorProfile.DoesNotExist:
-            return custom_response(
-                success=False,
-                errors={"item": "profile not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return VendorShopType.objects.get(pk=pk, is_deleted=False)
+        except VendorShopType.DoesNotExist:
+            raise Http404("not found")
     
     def get(self, request, pk, *args, **kwargs):
-        vendor_profile = self.get_object(pk)
-        serializer = VendorProfileSerializer(vendor_profile)
+        inst = self.get_object(pk)
+        serializer = VendorShopTypeSerializer(inst)
         return custom_response(
             success=True,
             data=serializer.data,
             status=status.HTTP_200_OK
         )
-
+    
     def put(self, request, pk, *args, **kwargs):
-        vendor_profile = self.get_object(pk)
-        serializer = VendorProfileSerializer(vendor_profile, data=request.data)
+        inst = self.get_object(pk)
+        serializer = VendorShopTypeSerializer(inst, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return custom_response(
@@ -94,13 +115,15 @@ class VendorProfileDetailView(APIView):
             errors=serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-
+    
     def delete(self, request, pk, *args, **kwargs):
-        vendor_profile = self.get_object(pk)
-        vendor_profile.is_deleted = True
-        vendor_profile.save()
+        inst = self.get_object(pk)
+        inst.is_deleted = True
+        inst.save()
         return custom_response(
             success=True,
             data=None,
             status=status.HTTP_204_NO_CONTENT
         )
+
+

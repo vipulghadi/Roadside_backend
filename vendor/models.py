@@ -2,8 +2,50 @@ from django.db import models
 from food_items.models import BaseModel,FoodItem
 from users.models import User
 
+types=(('food_truck', 'Food Truck'),
+    ('street_stall', 'Street Stall'),
+    ('restaurant', 'Restaurant'),
+    ('cafe', 'Café'),
+    ('catering_service', 'Catering Service'),
+    ('cloud_kitchen', 'Cloud Kitchen'),
+    ('bakery', 'Bakery'),
+    ('ice_cream_parlor', 'Ice Cream Parlor'),
+    ('juice_bar', 'Juice Bar'),
+    ('barbecue_stall', 'Barbecue Stall'),
+    ('diner', 'Diner'),
+    ('vegetarian', 'Vegetarian/Vegan Stall'),
+    ('fish_and_chips', 'Fish and Chips Shop'),
+    ('ethnic_food', 'Ethnic Food Stall'),
+    ('patisserie', 'Patisserie'),
+    ('food_court', 'Food Court Vendor'),
+    ('pop_up', 'Pop-Up Restaurant'),
+    ('snack_bar', 'Snack Bar'),
+    ('taco_stand', 'Taco Stand'),
+    ('dim_sum', 'Dim Sum Stall'),
+    ('chaat_stall', 'Chaat Stall'),
+    ('sweets_shop', 'Sweets Shop'),
+    ('noodle_bar', 'Noodle Bar'),
+    ('fried_chicken', 'Fried Chicken Shop'),
+    ('salad_bar', 'Salad Bar'),
+    ('tandoori_stall', 'Tandoori Stall'),
+    ('biryani_shop', 'Biryani Shop'),
+    ('kebab_stand', 'Kebab Stand'),
+    ('street_pizza', 'Street Pizza'),
+    ('gourmet_sandwich', 'Gourmet Sandwich Shop'),)
+    
+class VendorShopType(BaseModel):
+    name=models.CharField(max_length=255,null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.name or "-"
+    class Meta:
+        verbose_name_plural = "Vendor Shop Types"
+        db_table = "vendor_shop_types"
+        
+
 class VendorProfile(BaseModel):
-    vendor_name = models.CharField(max_length=255)
+    vendor_name = models.CharField(max_length=255,null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,related_name="shop")
     address = models.TextField(null=True, blank=True)
     city = models.CharField(max_length=255,null=True, blank=True)
@@ -16,9 +58,17 @@ class VendorProfile(BaseModel):
     open_at = models.TimeField(null=True, blank=True)
     close_at=models.TimeField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    vendor_type = models.ForeignKey(VendorShopType,null=True,blank=True,on_delete=models.SET_NULL)
+    rating = models.FloatField(default=0.0)  
+    reviews_count = models.IntegerField(default=0)  
+    opening_days = models.CharField(max_length=255, null=True, blank=True)
+    social_media_links = models.JSONField(null=True, blank=True)  
+    establishment_year = models.IntegerField(null=True, blank=True) 
+    website_url = models.URLField(null=True, blank=True) 
+    
     
     def __str__(self):
-        return self.name
+        return self.name or "-"
     
     class Meta:
         verbose_name_plural = "Vendor Profiles"
@@ -29,7 +79,7 @@ class VendorImages(BaseModel):
     image = models.ImageField(upload_to="vendor_images/", blank=True, null=True)
     
     def __str__(self):
-        return f"{self.vendor} - Image {self.id}"
+        return f"{self.vendor.vendor_name} - Image {self.id}" or '-'
     
     class Meta:
         verbose_name_plural = "Vendor Images"
@@ -41,7 +91,7 @@ class VendorFoodItem(BaseModel):
     food_item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
     
     def __str__(self):
-        return f"{self.vendor} - {self.food_item.name}"
+        return f"{self.vendor.vendor_name} - {self.food_item.name}" or '-'
     
     class Meta:
         verbose_name_plural = "Vendor Food Items"
@@ -52,7 +102,7 @@ class VendorFoodItemImage(BaseModel):
     image = models.ImageField(upload_to="vendor_food_item_images/",null=True,blank=True)
     
     def __str__(self):
-        return f"{self.vendor_food_item}  - Image {self.id}"
+        return f"{self.vendor_food_item}  - Image {self.id}" or '-'
     
     class Meta:
         verbose_name_plural = "Vendor Food Item Images"
@@ -63,7 +113,7 @@ class VendorLikes(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.vendor.vendor_name} - Like {self.id}"
+        return f"{self.vendor.vendor_name} - Like {self.id}" or '-'
     
     class Meta:
         verbose_name_plural = "Vendor Likes"
@@ -74,7 +124,7 @@ class VendorDislikes(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
     
     def __str__(self):
-        return f"{self.vendor.vendor_name} - Dislike {self.id}"
+        return f"{self.vendor.vendor_name} - Dislike {self.id}" or '-'
     
     class Meta:
         verbose_name_plural = "Vendor Dislikes"
@@ -89,7 +139,7 @@ class VendorReview(BaseModel):
     comment = models.TextField(null=True,blank=True)
     
     def __str__(self):
-        return f"{self.vendor.vendor_name} - {self.item.food_item.name} - Review {self.id}"
+        return f"{self.vendor.vendor_name} - {self.item.food_item.name} - Review {self.id}" or '-'
     
     class Meta:
         verbose_name_plural = "Vendor Reviews"
@@ -111,10 +161,5 @@ class VendrReviewDislikes(BaseModel):
         verbose_name_plural = "Vendor Reviews Dislikes"
         db_table = "vendor_review_dislikes"
         
-        
-        
-    
-    
-    
-        
+
     

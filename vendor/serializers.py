@@ -5,6 +5,11 @@ class VendorProfileSerializer(serializers.ModelSerializer):
         model = VendorProfile
         fields = '__all__'
         
+class VendorShopTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VendorShopType
+        fields = '__all__'
+        
 class VendorImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = VendorImages
@@ -16,7 +21,7 @@ class VendorFoodItemsSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 
-class FoodItemImagesSerializer(serializers.ModelSerializer):
+class VendorFoodItemImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = VendorFoodItemImage
         fields = '__all__'

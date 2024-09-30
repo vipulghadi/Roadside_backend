@@ -4,14 +4,12 @@ from rest_framework.generics import ListAPIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from django.http import Http404
 
 from SeeMe_be.pagination import PaginationSize20
 from SeeMe_be.utils import custom_response
-from .serializers import *
-from .models import *
-
-
-
+from food_items.serializers import *
+from food_items.models import *
 
 class FoodItemCategoryListCreateView(ListAPIView):
     serializer_class =FoodItemCategorySerializer
@@ -44,12 +42,13 @@ class FoodItemCategoryListCreateView(ListAPIView):
                 )
     
     def post(self, request, format=None):
-        serializer = FoodItemCategorySerializer
+        data=request.data
+        serializer = FoodItemCategorySerializer(data=data)
         if serializer.is_valid():
             data=serializer.save()
             return custom_response(
                     success=True,
-                    data=data,
+                    data=FoodItemCategorySerializer(data).data,
                     status=status.HTTP_201_CREATED
                 )
         return custom_response(
@@ -63,15 +62,13 @@ class FoodItemCategoryDetailed(APIView):
         try:
             return ItemCategory.objects.get(pk=pk, is_deleted=False)
         except ItemCategory.DoesNotExist:
-            return custom_response(
-                success=False,
-                errors={"item": "Item not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            raise Http404("not found")
+            
+            
     
     def get(self, request, pk, format=None):
         item = self.get_object(pk)
-        serializer = ItemCategorySerializer(item)
+        serializer = FoodItemCategorySerializer(item)
         return custom_response(
             success=True,
             data=serializer.data,
@@ -80,7 +77,7 @@ class FoodItemCategoryDetailed(APIView):
     
     def put(self, request, pk, format=None):
         item = self.get_object(pk)
-        serializer = ItemCategorySerializer(item, data=request.data)
+        serializer = FoodItemCategorySerializer(item, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return custom_response(
@@ -134,13 +131,12 @@ class FoodItemListCreateView(ListAPIView):
                 )
     
     def post(self, request, format=None):
-        request.data._mutable = True  
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             data=serializer.save()
             return custom_response(
                     success=True,
-                    data=data,
+                    data=FoodItemSerializer(data).data,
                     status=status.HTTP_201_CREATED
                 )
         return custom_response(
@@ -154,11 +150,7 @@ class FoodItemDetailed(APIView):
         try:
             return FoodItem.objects.get(pk=pk, is_deleted=False)
         except FoodItem.DoesNotExist:
-            return custom_response(
-                success=False,
-                errors={"item": "Item not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            raise Http404("not found")
     
     def get(self, request, pk, format=None):
         item = self.get_object(pk)

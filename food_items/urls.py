@@ -1,7 +1,8 @@
 
 from django.contrib import admin
 from django.urls import path
-from .views import *
+from .views.client import*
+from .views.dashboard import *
 
 urlpatterns = [
     path('food-item-category/', FoodItemCategoryListCreateView.as_view(),name='food-item-category'),
