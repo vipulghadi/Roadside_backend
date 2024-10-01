@@ -45,6 +45,27 @@ class VendorShopType(BaseModel):
         
 
 class VendorProfile(BaseModel):
+    VENDOR_LOCATION_CHOICES = [
+        ('permanent', 'Permanent'),
+        ('movable', 'Movable Thela'),
+    ]
+    FOOD_TYPE_CHOICES = [
+        ('veg', 'Veg'),
+        ('nonveg', 'Non-Veg'),
+        ('all', 'All'),
+    ]
+    SITTING_CHOICES = [
+        ("not available", 'Not available'),
+        ('indoor', 'Indoor'),
+        ('outdoor', 'Outdoor'),
+        ('both', 'Both'),
+    ]
+    SIZE_CHOICES = [
+        ('small', 'Small'),
+        ('medium', 'Medium'),
+        ('large', 'Large'),
+    ]
+     
     vendor_name = models.CharField(max_length=255,null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,related_name="shop")
     address = models.TextField(null=True, blank=True)
@@ -66,6 +87,10 @@ class VendorProfile(BaseModel):
     establishment_year = models.IntegerField(null=True, blank=True) 
     website_url = models.URLField(null=True, blank=True) 
     
+    food_type = models.CharField(max_length=50, choices=FOOD_TYPE_CHOICES, default='veg')
+    location_type = models.CharField(max_length=50, choices=VENDOR_LOCATION_CHOICES, default='permanent')
+    sitting_available = models.CharField(max_length=50, choices=SITTING_CHOICES, default='both')
+    size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='small')
     
     def __str__(self):
         return self.name or "-"
@@ -94,7 +119,7 @@ class VendorFoodItem(BaseModel):
         return f"{self.vendor.vendor_name} - {self.food_item.name}" or '-'
     
     class Meta:
-        verbose_name_plural = "Vendor Food Items"
+        verbose_name_plural ="Vendor Food Items"
         db_table = "vendor_food_items"
 
 class VendorFoodItemImage(BaseModel):
@@ -129,7 +154,7 @@ class VendorDislikes(BaseModel):
     class Meta:
         verbose_name_plural = "Vendor Dislikes"
         db_table = "vendor_dislikes"
-        
+
 
 class VendorReview(BaseModel):
     vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="vendor_reviews",null=True, blank=True)
@@ -160,6 +185,32 @@ class VendrReviewDislikes(BaseModel):
     class Meta:
         verbose_name_plural = "Vendor Reviews Dislikes"
         db_table = "vendor_review_dislikes"
+
+
+class VendorRating(BaseModel):
+    vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name='ratings',null=True,blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True) 
+    behavior_rating = models.FloatField(default=0.0) 
+    service_rating = models.FloatField(default=0.0)   
+    quality_rating = models.FloatField(default=0.0)   
+    cleanliness_rating = models.FloatField(default=0.0) 
+    value_for_money_rating = models.FloatField(default=0.0)  
+    overall_rating = models.FloatField(default=0.0)  
+    
+    def save(self, *args, **kwargs):
+        self.overall_rating = (
+            self.behavior_rating + self.service_rating + self.quality_rating +
+            self.cleanliness_rating + self.value_for_money_rating
+        ) / 5
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.vendor.vendor_name} - Rating {self.id}" or '-'
+    
+    class Meta:
+        verbose_name_plural = "Vendor Ratings"
+        db_table = "vendor_ratings"
+
         
 
     

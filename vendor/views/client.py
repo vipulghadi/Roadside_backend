@@ -6,10 +6,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from django.http import Http404
 
-from SeeMe_be.utils import custom_response,validate_phone_number
-from SeeMe_be.otp import generate_otp,validate_otp
+from Roadside_backend.utils import custom_response,validate_phone_number
+from Roadside_backend.otp import generate_otp,validate_otp
 from vendor.serializers import *
-from SeeMe_be.pagination import PaginationSize20
+from Roadside_backend.pagination import PaginationSize20
 
 
 class VendorProfileCreateView(APIView):

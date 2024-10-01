@@ -6,8 +6,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.http import Http404
 
-from SeeMe_be.pagination import PaginationSize20
-from SeeMe_be.utils import custom_response
+from Roadside_backend.pagination import PaginationSize20
+from Roadside_backend.utils import custom_response
 from food_items.serializers import *
 from food_items.models import *
 

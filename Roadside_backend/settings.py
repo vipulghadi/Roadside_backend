@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'SeeMe_be.urls'
+ROOT_URLCONF = 'Roadside_backend.urls'
 
 TEMPLATES = [
     {
@@ -75,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'SeeMe_be.wsgi.application'
+WSGI_APPLICATION = 'Roadside_backend.wsgi.application'
 AUTH_USER_MODEL = "users.User"
 
 # Database
