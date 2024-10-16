@@ -1,8 +1,6 @@
-
 from django.contrib import admin
 from django.urls import path
-from .views.client import *
-from .views.dashboard import *
+from authentication.views.client_side import *
 
 urlpatterns = [
     path('otp-signup/', OTPSignupView.as_view(),name='otp-signup'),

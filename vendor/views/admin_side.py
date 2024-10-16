@@ -19,7 +19,6 @@ class VendorProfileListView(ListAPIView):
     def get_queryset(self):
         return  VendorProfile.objects.filter(is_deleted=False).order_by('-id')
     
-    
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page_param = self.request.query_params.get("page")
