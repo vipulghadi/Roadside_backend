@@ -13,7 +13,6 @@ from Roadside_backend.otp import generate_otp,validate_otp
 from users.serializers import *
 from Roadside_backend.pagination import PaginationSize20
 
-
 class OTPSignupView(APIView):
     permission_classes=[AllowAny]
     def post(self, request):
