@@ -22,14 +22,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: "3.12"
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        aws-access-key-id: "AKIA6OM5BNUK3F7GHFFC"
+        aws-secret-access-key: "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"
+        aws-region: "ap-south-1"
 
     - name: Install Dependencies
       run: |
@@ -58,7 +58,7 @@ jobs:
             "profile_name": "default",
             "project_name": "roadside-backen",
             "runtime": "python3.12",
-            "s3_bucket": "roadside"
+            "s3_bucket": "roadside456234"
           }
         }' > zappa_settings.json
 
