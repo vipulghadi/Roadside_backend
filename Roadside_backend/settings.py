@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-5hex$m9=j7f&ur7xe3qh$t^3_6!#yc)uymrkmii)hz$z^9$yzx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["xd4fia5336.execute-api.ap-south-1.amazonaws.com",]
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'users',
     'food_items',
     'vendor',
+    'authentication'
 ]
 
 MIDDLEWARE = [
