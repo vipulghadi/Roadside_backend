@@ -56,7 +56,7 @@ jobs:
               "concurrent"
             ],
             "profile_name": "default",
-            "project_name": "roadside-backen",
+            "project_name": "roadside-backend",
             "runtime": "python3.12",
             "s3_bucket": "roadside456234"
           }
