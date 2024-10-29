@@ -1,4 +1,4 @@
-name: Deploy Django to AWS Lambda
+name: Deploy Roadside Backend to AWS Lambda
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - main
 
 env:
-  AWS_REGION: us-east-1  
-  PYTHON_VERSION: "3.12" 
+  AWS_REGION: ap-south-1
+  PYTHON_VERSION: "3.12"
 
 jobs:
   deploy:
@@ -34,34 +34,42 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
+        # Install requirements excluding the packages specified in zappa_settings
+        pip install $(grep -v "boto3\|dateutil\|botocore\|s3transfer\|concurrent" requirements.txt)
         pip install zappa
-        pip install -r requirements.txt
 
-   
+    - name: Run Tests
+      run: |
+        python manage.py test
+
+    - name: Create/Update Zappa Settings
+      run: |
+        echo '{
+          "dev": {
+            "aws_region": "ap-south-1",
+            "django_settings": "Roadside_backend.settings",
+            "exclude": [
+              "boto3",
+              "dateutil",
+              "botocore",
+              "s3transfer",
+              "concurrent"
+            ],
+            "profile_name": "default",
+            "project_name": "roadside-backen",
+            "runtime": "python3.12",
+            "s3_bucket": "roadside"
+          }
+        }' > zappa_settings.json
 
     - name: Deploy with Zappa
       run: |
-        # Update zappa settings if not exists in repo
-        if [ ! -f zappa_settings.json ]; then
-          echo '{
-            "production": {
-              "aws_region": "${{ env.AWS_REGION }}",
-              "django_settings": "Roadside_backend.settings",
-              "profile_name": "default",
-              "project_name": "your-project",
-              "runtime": "python${{ env.PYTHON_VERSION }}",
-              "s3_bucket": "zappa-your-bucket"
-            }
-          }' > zappa_settings.json
-        fi
-        
         # Check if this is first deployment
-        if ! zappa status production 2>/dev/null; then
-          zappa deploy production
+        if ! zappa status dev 2>/dev/null; then
+          zappa deploy dev
         else
-          zappa update production
+          zappa update dev
         fi
-
 
 
     - name: Notify Deployment Status
@@ -71,7 +79,7 @@ jobs:
         script: |
           const { job, conclusion } = context;
           const status = conclusion === 'success' ? '✅ Success' : '❌ Failure';
-          const message = `Deployment to AWS Lambda ${status}`;
+          const message = `Deployment to AWS Lambda (dev) ${status}`;
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
