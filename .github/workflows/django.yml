@@ -1,0 +1,80 @@
+name: Deploy Django to AWS Lambda
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1  
+  PYTHON_VERSION: "3.12" 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install zappa
+        pip install -r requirements.txt
+
+   
+
+    - name: Deploy with Zappa
+      run: |
+        # Update zappa settings if not exists in repo
+        if [ ! -f zappa_settings.json ]; then
+          echo '{
+            "production": {
+              "aws_region": "${{ env.AWS_REGION }}",
+              "django_settings": "Roadside_backend.settings",
+              "profile_name": "default",
+              "project_name": "your-project",
+              "runtime": "python${{ env.PYTHON_VERSION }}",
+              "s3_bucket": "zappa-your-bucket"
+            }
+          }' > zappa_settings.json
+        fi
+        
+        # Check if this is first deployment
+        if ! zappa status production 2>/dev/null; then
+          zappa deploy production
+        else
+          zappa update production
+        fi
+
+
+
+    - name: Notify Deployment Status
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { job, conclusion } = context;
+          const status = conclusion === 'success' ? '✅ Success' : '❌ Failure';
+          const message = `Deployment to AWS Lambda ${status}`;
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.name,
+            body: message
+          });
