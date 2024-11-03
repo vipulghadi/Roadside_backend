@@ -82,7 +82,7 @@ class VendorProfile(BaseModel):
     vendor_type = models.ForeignKey(VendorShopType,null=True,blank=True,on_delete=models.SET_NULL)
     rating = models.FloatField(default=0.0)  
     reviews_count = models.IntegerField(default=0)  
-    opening_days = models.CharField(max_length=255, null=True, blank=True)
+    opening_days = models.JSONField(blank=True, null=True)
     social_media_links = models.JSONField(null=True, blank=True)  
     establishment_year = models.IntegerField(null=True, blank=True) 
     website_url = models.URLField(null=True, blank=True) 

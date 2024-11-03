@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken  
 from rest_framework.permissions import AllowAny
 from django.http import Http404
+from django.db import transaction
 
 from Roadside_backend.utils import custom_response,validate_phone_number
 from Roadside_backend.otp import generate_otp,validate_otp
@@ -12,6 +13,68 @@ from vendor.serializers import *
 from Roadside_backend.pagination import PaginationSize20
 
 
+class CreateVendorAccountView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data.copy()
+        
+        # Extract necessary fields
+        first_name = data.pop('first_name', None)
+        last_name = data.pop('last_name', None)
+        contact_number = data.get('contact_number', None)
+        
+        # Basic validation
+        if not first_name or not last_name or not contact_number:
+            return custom_response(
+                success=False,
+                message="First name, last name, and contact number are required.",
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if user with contact number already exists
+        if User.objects.filter(contact_number=contact_number).exists():
+            return custom_response(
+                success=False,
+                message="User with this contact number already exists.",
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            with transaction.atomic():
+                # Validate and save the Vendor Profile data before creating the User
+                serializer = VendorProfileSerializer(data=data)
+                if serializer.is_valid():
+                    user = User(
+                        first_name=first_name,
+                        last_name=last_name,
+                        contact_number=contact_number,
+                        is_active=False,
+                        role="vendor"
+                    )
+                    user.set_unusable_password() 
+                    transaction.on_commit(user.save)
+                    serializer.save(user=user)
+
+                    return custom_response(
+                        success=True,
+                        message="Account created successfully.",
+                        status=status.HTTP_201_CREATED
+                    )
+                else:
+                    print(serializer.errors)
+                    return custom_response(
+                        success=False,
+                        errors=serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+        except Exception as e:
+            return custom_response(
+                success=False,
+                message=f"An error occurred: {str(e)}",
+            )
+            
+        
 class VendorProfileCreateView(APIView):
     def post(self, request, format=None):
         request.data._mutable = True  

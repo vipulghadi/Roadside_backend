@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class BaseModel(models.Model):
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
@@ -22,7 +21,7 @@ class ItemCategory(BaseModel):
     
 class FoodItem(BaseModel):
     name = models.CharField(max_length=255,null=True, blank=True)
-    image=models.ImageField(upload_to="food_item_images/", blank=True, null=True)
+    image=models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
     is_deleted= models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-5hex$m9=j7f&ur7xe3qh$t^3_6!#yc)uymrkmii)hz$z^9$yzx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["xd4fia5336.execute-api.ap-south-1.amazonaws.com",]
+ALLOWED_HOSTS = ["*","127.0.0.1"]
 
 
 # Application definition
@@ -41,14 +41,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+    'corsheaders',   
     #my models
     'users',
-    'food_items',
     'vendor',
-    'authentication'
+    'authentication',
+    'food_items',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,6 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'Roadside_backend.urls'
 
 TEMPLATES = [
@@ -168,3 +171,16 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5), 
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+
+#EMAIL SERVICE FUN  
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your_email@gmail.com' 
+EMAIL_HOST_PASSWORD = 'your_password'     
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0' 
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

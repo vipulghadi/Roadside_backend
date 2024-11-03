@@ -4,6 +4,8 @@ from django.db import models
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
 from django.db import models, transaction
 import uuid
+import random
+import string
 
 
 
@@ -40,6 +42,12 @@ class UserManager(BaseUserManager):
         return self._create_user(username, password=password, **extra_fields)
 
 
+
+def generate_username():
+    chars = string.ascii_letters + string.digits 
+    username = ''.join(random.choice(chars) for _ in range(8)) 
+    return username
+
 class User(AbstractBaseUser, PermissionsMixin):
     user_roles=(
         ('admin','admin'),
@@ -66,6 +74,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     objects = UserManager()
     USERNAME_FIELD = 'username'
+    
+    def save(self, *args, **kwargs):
+        if not self.username:  
+            self.username = generate_username()
+        super(User, self).save(*args, **kwargs)
+        
     
     def __str__(self):
         return self.username or "unnamed"

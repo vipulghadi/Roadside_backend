@@ -3,7 +3,7 @@ from django.urls import path
 from authentication.views.client_side import *
 
 urlpatterns = [
-    path('otp-signup/', OTPSignupView.as_view(),name='otp-signup'),
     path('otp-login/', OTPLoginView.as_view(),name='otp-login'),
+    path('get-current-user/', GetCurrentUser.as_view(),name='get-current-user'),
     
 ]

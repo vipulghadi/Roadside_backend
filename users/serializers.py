@@ -20,7 +20,7 @@ class CreateUser(serializers.ModelSerializer):
 class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['phone_number', 'email', 'first_name', 'last_name',"username"]
+        fields = ['contact_number', 'email', 'first_name', 'last_name',"username"]
 
 class OTPSignupSerializer(serializers.ModelSerializer):
         class Meta:
