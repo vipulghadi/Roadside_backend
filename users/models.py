@@ -43,9 +43,10 @@ class UserManager(BaseUserManager):
 
 
 
+
 def generate_username():
-    chars = string.ascii_letters + string.digits 
-    username = ''.join(random.choice(chars) for _ in range(8)) 
+    chars = string.ascii_uppercase + string.digits  
+    username = ''.join(random.choice(chars) for _ in range(12))
     return username
 
 class User(AbstractBaseUser, PermissionsMixin):

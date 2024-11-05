@@ -12,6 +12,7 @@ from Roadside_backend.utils import custom_response,validate_phone_number
 from Roadside_backend.otp import generate_otp,validate_otp
 from users.serializers import *
 from Roadside_backend.pagination import PaginationSize20
+from vendor.models import VendorProfile
 
 
 
@@ -30,7 +31,7 @@ class OTPLoginView(APIView):
             user, created = User.objects.get_or_create(
                 contact_number=contact_number,
                 
-                defaults={'is_active': False}  # Set as inactive initially
+                defaults={'is_active': False}  
             )
         
 
@@ -66,12 +67,25 @@ class OTPLoginView(APIView):
                     user.is_active = True
                     user.save()
                     
+                    vendor_id=None
+                    if user.role=="vendor":
+                        vendor_id=VendorProfile.objects.get(owner=user,is_deleted=False).id
                     refresh = RefreshToken.for_user(user)
                     
                     return custom_response(
                         success=True,
                         message="OTP is valid. login successfull.",
                         data={
+                            "userInfo":{
+                            "user_id":user.id,
+                            "vendor_id":vendor_id,
+                            "first_name":user.first_name,
+                            "last_name":user.last_name,
+                            "email":user.email,
+                            "contact_number":user.contact_number,
+                            "role":user.role,
+                            "username":user.username,
+                            },
                             'refresh_token': str(refresh),
                             'access_token': str(refresh.access_token)
                         },

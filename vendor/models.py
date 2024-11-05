@@ -93,7 +93,7 @@ class VendorProfile(BaseModel):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='small')
     
     def __str__(self):
-        return self.name or "-"
+        return self.vendor_name or "-"
     
     class Meta:
         verbose_name_plural = "Vendor Profiles"

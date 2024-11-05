@@ -4,7 +4,7 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'email', 'first_name', 'last_name', 'username','role']
+        fields = ['id', 'contact_number', 'email', 'first_name', 'last_name', 'username','role']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,13 +14,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class CreateUser(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [ 'phone_number', 'password']
+        fields = [ 'contact_number', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
 class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['contact_number', 'email', 'first_name', 'last_name',"username"]
+        fields = ['username', 'contact_number', 'email', 'first_name', 'last_name',"username","role"]
 
 class OTPSignupSerializer(serializers.ModelSerializer):
         class Meta:

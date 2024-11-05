@@ -104,6 +104,7 @@ class FoodItemCategoryDetailed(APIView):
 class FoodItemListCreateView(ListAPIView):
     serializer_class = FoodItemSerializer
     renderer_classes = [JSONRenderer]
+    permission_classes=[AllowAny]
     
     
     def get_queryset(self):
