@@ -1,6 +1,7 @@
 from django.db import models
 from food_items.models import BaseModel,FoodItem
 from users.models import User
+from Roadside_backend.utils import generate_slug
 
 types=(('food_truck', 'Food Truck'),
     ('street_stall', 'Street Stall'),
@@ -65,7 +66,7 @@ class VendorProfile(BaseModel):
         ('medium', 'Medium'),
         ('large', 'Large'),
     ]
-     
+    slug = models.SlugField(max_length=355, null=True, blank=True)
     vendor_name = models.CharField(max_length=255,null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,related_name="shop")
     address = models.TextField(null=True, blank=True)
@@ -86,6 +87,8 @@ class VendorProfile(BaseModel):
     social_media_links = models.JSONField(null=True, blank=True)  
     establishment_year = models.IntegerField(null=True, blank=True) 
     website_url = models.URLField(null=True, blank=True) 
+    is_offer=models.BooleanField(default=False)
+    maximum_discount=models.IntegerField(default=0)
     
     food_type = models.CharField(max_length=50, choices=FOOD_TYPE_CHOICES, default='veg')
     location_type = models.CharField(max_length=50, choices=VENDOR_LOCATION_CHOICES, default='permanent')
@@ -95,13 +98,18 @@ class VendorProfile(BaseModel):
     def __str__(self):
         return self.vendor_name or "-"
     
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = generate_slug(self.vendor_name)
+        super(VendorProfile, self).save(*args, **kwargs)
+    
     class Meta:
         verbose_name_plural = "Vendor Profiles"
         db_table = "vendor_profiles"
         
 class VendorImages(BaseModel):
     vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="images",null=True, blank=True)
-    image = models.ImageField(upload_to="vendor_images/", blank=True, null=True)
+    image_link =models.TextField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.vendor.vendor_name} - Image {self.id}" or '-'
@@ -114,6 +122,13 @@ class VendorImages(BaseModel):
 class VendorFoodItem(BaseModel):
     vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="vendor_food_items")
     food_item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
+    price=models.DecimalField(default=0,decimal_places=2,max_digits=5)
+    is_offer=models.BooleanField(default=False)
+    offer_discount_percent=models.IntegerField(default=0)
+    offer_price=models.DecimalField(default=0,decimal_places=2,max_digits=5)
+    rating=models.IntegerField(default=0)
+    
+    
     
     def __str__(self):
         return f"{self.vendor.vendor_name} - {self.food_item.name}" or '-'
@@ -133,34 +148,11 @@ class VendorFoodItemImage(BaseModel):
         verbose_name_plural = "Vendor Food Item Images"
         db_table = "vendor_food_item_images"
 
-class VendorLikes(BaseModel):
-    vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="vendor_likes",null=True,blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    
-    def __str__(self):
-        return f"{self.vendor.vendor_name} - Like {self.id}" or '-'
-    
-    class Meta:
-        verbose_name_plural = "Vendor Likes"
-        db_table = "vendor_likes"
-
-class VendorDislikes(BaseModel):
-    vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="vendor_dislikes",null=True,blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
-    
-    def __str__(self):
-        return f"{self.vendor.vendor_name} - Dislike {self.id}" or '-'
-    
-    class Meta:
-        verbose_name_plural = "Vendor Dislikes"
-        db_table = "vendor_dislikes"
 
 
 class VendorReview(BaseModel):
     vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="vendor_reviews",null=True, blank=True)
-    item=models.ForeignKey(VendorFoodItem, on_delete=models.CASCADE, related_name="vendor_food_items",null=True,blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True)
-    rating = models.IntegerField(default=0)
     comment = models.TextField(null=True,blank=True)
     
     def __str__(self):
@@ -170,21 +162,6 @@ class VendorReview(BaseModel):
         verbose_name_plural = "Vendor Reviews"
         db_table = "vendor_reviews"
     
-class VendorReviewLikes(BaseModel):
-    review = models.ForeignKey(VendorReview, on_delete=models.CASCADE, null=True,blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
-    
-    class Meta:
-        verbose_name_plural = "Vendor Reviews Likes"
-        db_table = "vendor_review_likes"
-
-class VendrReviewDislikes(BaseModel):
-    review = models.ForeignKey(VendorReview, on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True,blank=True)
-    
-    class Meta:
-        verbose_name_plural = "Vendor Reviews Dislikes"
-        db_table = "vendor_review_dislikes"
 
 
 class VendorRating(BaseModel):

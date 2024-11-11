@@ -1,6 +1,6 @@
 # tickets/models.py
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import User
 from food_items.models import BaseModel
 
 class GeneralIssues(BaseModel):
@@ -32,10 +32,10 @@ class Ticket(BaseModel):
 
 
 class TicketResponse(BaseModel):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='responses',blank=True,null=True)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='ticket_responses',blank=True,null=True)
     response_text = models.TextField(blank=True, null=True)
-    response_by = models.ForeignKey(User, on_delete=models.CASCADE,blank=True,null=True)
-    response_to=models.ForeignKey(User, on_delete=models.CASCADE,blank=True,null=True)
+    response_by = models.ForeignKey(User, on_delete=models.CASCADE,blank=True,null=True,related_name="response_by_user")
+    response_to=models.ForeignKey(User, on_delete=models.CASCADE,blank=True,null=True,related_name="response_to_user")
     
     class Meta:
         verbose_name_plural = "Ticket Responses"

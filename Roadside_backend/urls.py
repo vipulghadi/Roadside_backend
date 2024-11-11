@@ -18,8 +18,11 @@ urlpatterns = [
     path('api/v1/admin/vendor/', include("vendor.urls.admin_urls")),
     path('api/v1/client/vendor/', include("vendor.urls.client_urls")),
     
-    path('api/v1/admin/notifications/', include("notifications.urls.admin_urls")),
-    path('api/v1/client/notifications/', include("notifications.urls.client_urls")),
+    # path('api/v1/admin/notifications/', include("notifications.urls.admin_urls")),
+    # path('api/v1/client/notifications/', include("notifications.urls.client_urls")),
+    
+    path('api/v1/admin/support/', include("support.urls.admin_urls")),
+    path('api/v1/client/support/', include("support.urls.client_urls")),
     
 ]
 

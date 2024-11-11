@@ -63,31 +63,17 @@ class VendorFoodItemImagesSerializer(serializers.ModelSerializer):
         model = VendorFoodItemImage
         fields = '__all__'
         
-class VendorLikesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VendorLikes
-        fields = '__all__'
-        
-class VendorDislikesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VendorDislikes
-        fields = '__all__'
 
 class VendorReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = VendorReview
         fields = '__all__'
         
-class VendorReviewLikesSerializer(serializers.ModelSerializer):
+class VendorRatingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = VendorReviewLikes
+        model = VendorRating
         fields = '__all__'
         
-class VendorReviewDislikesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VendorReviewLikes
-        fields = '__all__'
-
 
         
         
