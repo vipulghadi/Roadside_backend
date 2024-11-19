@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',   
     'django_extensions',
+    'channels',
     #my models
     'users',
     'vendor',
@@ -83,7 +84,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Roadside_backend.wsgi.application'
+# WSGI_APPLICATION = 'Roadside_backend.wsgi.application'
+ASGI_APPLICATION = "Roadside_backend.asgi.application"
 AUTH_USER_MODEL = "users.User"
 
 # Database
@@ -102,6 +104,11 @@ DATABASES = {
 }
 
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
