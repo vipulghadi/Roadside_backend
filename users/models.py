@@ -80,7 +80,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not self.username:  
             self.username = generate_username()
         super(User, self).save(*args, **kwargs)
-        
     
     def __str__(self):
         return self.username or "unnamed"
@@ -118,7 +117,30 @@ class UserProfile(models.Model):
         ordering = ['-created_at']
         db_table="user_profile"
     
+class StaffUserProfile(models.Model):
+    DESIGNATION_CHOICES=(
+        ("chat_assistant","chat_assistant"),
+        ("chatbot","chatbot"),
+        ("supervisor","supervisor"),
+        ("regular","regular")
+    )
     
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
+    designation = models.CharField(max_length=255 ,choices=DESIGNATION_CHOICES, null=True, blank=True)
+    is_free = models.BooleanField(default=False)
+    is_online = models.BooleanField(default=False)
+    is_deleted= models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    is_active = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.user}'s Staff Profile" or "-"
+    
+    class Meta:
+        ordering = ['-created_at']
+        db_table="staff_user_profile"
+        
 class ManagementConfig(models.Model):
     key = models.CharField(max_length=100, unique=True)
     value = models.TextField(blank=True)

@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'authentication',
     'food_items',
     'notifications',
-    'support'
+    'support',
+    'chat_support',
 ]
 
 MIDDLEWARE = [

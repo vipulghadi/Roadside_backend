@@ -24,6 +24,8 @@ urlpatterns = [
     path('api/v1/admin/support/', include("support.urls.admin_urls")),
     path('api/v1/client/support/', include("support.urls.client_urls")),
     
+    path('api/v1/client/chat-support/', include("chat_support.urls")),
+    
 ]
 
 if settings.DEBUG:
