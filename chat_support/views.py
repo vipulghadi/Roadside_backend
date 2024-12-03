@@ -31,6 +31,7 @@ class ConnectToRoomApi(APIView):
                                 "is_anonymous_user":room.is_anonymous_user,
                                 "anonymous_user":room.anonymous_user,
                                 "chat_assistant_username": room.assistant.username,
+                                "chat_assistant_id": room.assistant.id,
                                 "first_name": room.assistant.first_name,
                                 "last_name": room.assistant.last_name
                             },
@@ -56,6 +57,7 @@ class ConnectToRoomApi(APIView):
                                 "is_anonymous_user":room.is_anonymous_user,
                                 "anonymous_user":room.anonymous_user,
                                 "chat_assistant_username": room.assistant.username,
+                                "chat_assistant_id": room.assistant.id,
                                 "first_name": room.assistant.first_name,
                                 "last_name": room.assistant.last_name
                                 },
@@ -76,7 +78,8 @@ class ConnectToRoomApi(APIView):
                                 "anonymous_user":room.anonymous_user,
                                 "chat_assistant_username": room.assistant.username,
                                 "first_name": room.assistant.first_name,
-                                "last_name": room.assistant.last_name
+                                "last_name": room.assistant.last_name,
+                                "chat_assistant_id": room.assistant.id,
                                 },
                                 status=200
                             )
@@ -112,6 +115,7 @@ class ConnectToRoomApi(APIView):
                                 "is_anonymous_user":room.is_anonymous_user,
                                 "anonymous_user":room.anonymous_user,
                                 "chat_assistant_username": room.assistant.username,
+                                "chat_assistant_id": room.assistant.id,
                                 "first_name": room.assistant.first_name,
                                 "last_name": room.assistant.last_name
                             },

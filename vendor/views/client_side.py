@@ -9,7 +9,8 @@ from django.db import transaction
 import random
 from rest_framework.response import Response
 from django.db.models import Avg
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 from Roadside_backend.utils import custom_response,validate_phone_number,generate_slug
 from Roadside_backend.otp import generate_otp,validate_otp
@@ -190,6 +191,8 @@ class GetNearbyYouVendorsAPI(APIView):
                          "is_offer":vendor.is_offer,
                          "maximum_discount":vendor.maximum_discount,
                          "vendor_image": vendor_image.image_link,
+                          "location_type": vendor.location_type,
+                         "size": vendor.size,
                         
                 })
             
@@ -210,31 +213,53 @@ class GetNearbyYouVendorsAPI(APIView):
     
 class ExploreNearbyVendorsAPI(APIView):
     permission_classes = [AllowAny]
+    filter_backends =[DjangoFilterBackend,filters.SearchFilter]
+    filterset_fields ={
+        "open_at":["exact","gte","lte"],
+        "close_at":["exact","gte","lte"],
+        "food_type":["exact","icontains"],
+        "location_type":["exact"],
+        "sitting_available":["exact"],
+        "size":["exact"],
+        
+        
+    }
+    
     
     def get(self, request, *args, **kwargs):
         response_data = []
         try:
-            nearby_vendors = VendorProfile.objects.all()[:15]
+            queryset = VendorProfile.objects.all(is_deleted=False)
+            paginator=PaginationSize20()
+            paginated_queryset=paginator.paginate_queryset(queryset,request)
             
-            for vendor in nearby_vendors:
+            
+            for vendor in paginated_queryset:
                 food_items = VendorFoodItem.objects.filter(vendor=vendor, is_deleted=False)[:2]
                 vendor_image = VendorImages.objects.filter(vendor=vendor, is_deleted=False).first()
                 vendor_food_items_serializer = VendorFoodItemsSerializer(food_items, many=True)
                 
                 response_data.append({
-                    "id":vendor.id,
-                    "vendor_profile": {
+                        "id":vendor.id,
                         "vendor_name":vendor.vendor_name,
                         "owner":vendor.owner.first_name+vendor.owner.last_name,
                          "rating":vendor.rating,
                          "logitude":vendor.longitude,
                          "latitude":vendor.latitude,
-                         "slug":vendor.slug
-                },
-                    "vendor_image": vendor_image.image_link,
-                    "food_items": vendor_food_items_serializer.data
+                         "slug":vendor.slug,
+                         "rating":vendor.rating,
+                         "address":vendor.address,
+                         "food_type":vendor.food_type,
+                         "sitting_available":vendor.sitting_available,
+                         "is_offer":vendor.is_offer,
+                         "maximum_discount":vendor.maximum_discount,
+                         "vendor_image": vendor_image.image_link,
+                         "location_type": vendor.location_type,
+                         "size": vendor.size,
+                        
                 })
             
+            paginated_response = paginator.get_paginated_response(response_data)
             # Return response after processing all vendors
             return custom_response(
                 success=True,
@@ -245,6 +270,7 @@ class ExploreNearbyVendorsAPI(APIView):
         except Exception as e:
             print(e)
             return custom_response(
+                data=[],
                 success=False,
                 message="An error occurred while fetching nearby vendors.",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -278,6 +304,8 @@ class GetVendorWithOffersAPI(APIView):
                          "is_offer":vendor.is_offer,
                          "maximum_discount":vendor.maximum_discount,
                          "vendor_image": vendor_image.image_link,
+                          "location_type": vendor.location_type,
+                         "size": vendor.size,
                         
                 })
             
@@ -296,49 +324,7 @@ class GetVendorWithOffersAPI(APIView):
                 message="An error occurred while fetching nearby vendors.",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )    
-class ExploreNearbyOffersAPI(APIView):
-    permission_classes=[AllowAny]
-    def get(self, request, *args, **kwargs):
-        response_data = []
 
-        try:
-            nearby_vendors = VendorProfile.objects.filter(is_deleted=False,is_offer=True)[:10]
-            
-            for vendor in nearby_vendors:
-                food_items = VendorFoodItem.objects.filter(vendor=vendor, is_deleted=False)[:2]
-                vendor_image = VendorImages.objects.filter(vendor=vendor, is_deleted=False).first()
-                vendor_food_items_serializer = VendorFoodItemsSerializer(food_items, many=True)
-            
-                response_data.append({
-                    "id":vendor.id,
-                    "vendor_profile": {
-                        "vendor_name":vendor.vendor_name,
-                        "owner":vendor.owner.first_name+vendor.owner.last_name,
-                         "rating":vendor.rating,
-                         "logitude":vendor.longitude,
-                         "latitude":vendor.latitude,
-                         "maximum_discount":vendor.maximum_discount,
-                         "slug":vendor.slug
-                },
-                    "vendor_image":  vendor_image.image_link or "",
-                    "food_items": vendor_food_items_serializer.data
-                })
-            
-            # Return response after processing all vendors
-            return custom_response(
-                success=True,
-                data=response_data,
-                status=status.HTTP_200_OK
-            )
-        
-        except Exception as e:
-            print(e)
-            return custom_response(
-                success=False,
-                message="An error occurred while fetching nearby vendors.",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )    
-    
 class GetVendorProfileAPI(APIView):
     permission_classes=[AllowAny]
     def get_object(self,slug):
@@ -379,7 +365,151 @@ class GetVendorFoodItemsAPI(APIView):
             status=status.HTTP_200_OK
         )
         
-
+class GetVendorsByFoodItem(APIView):
+    permission_classes=[AllowAny]
+    
+    def get(self, request, *args, **kwargs):
+        food_item_id = kwargs.get('food_item_id')
+        food_item = FoodItem.objects.filter(id=food_item_id,is_deleted=False).first()
+        if not food_item:
+            return custom_response(
+                success=False,
+                message="Food item not found.",
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        vendors = VendorFoodItem.objects.filter(
+                            food_item=food_item, is_deleted=False).values_list('vendor', flat=True)
+            
+class GetPopularFoodItemVendorsList(APIView):
+    permission_classes=[AllowAny]
+    def get_object(self, pk):
+        try:
+            return FoodItem.objects.get(pk=pk,is_deleted=False)  
+        except:
+            raise Http404("Item not found")  
+    
+    def get(self,request,pk):
+        try:
+            food_item = self.get_object(pk)
+            response_data=[]
+            
+            vendors=VendorProfile.objects.filter(is_deleted=False)
+            
+            #Note :add logic here
+            # vendor_ids = VendorFoodItem.objects.filter(food_item=food_item, is_deleted=False).distinct().values_list("id",flat=True)
+            # vendors=VendorProfile.objects.filter(id__in=vendor_ids,is_deleted=False).distinct()
+            
+            paginator=PaginationSize20()
+            paginated_queryset=paginator.paginate_queryset(vendors,request)
+            
+            for vendor in paginated_queryset:
+                
+                food_items = VendorFoodItem.objects.filter(vendor=vendor, is_deleted=False)[:2]
+                vendor_image = VendorImages.objects.filter(vendor=vendor, is_deleted=False).first()
+                vendor_food_items_serializer = VendorFoodItemsSerializer(food_items, many=True)
+                
+                response_data.append({
+                            "id":vendor.id,
+                            "vendor_name":vendor.vendor_name,
+                            "owner":vendor.owner.first_name+vendor.owner.last_name,
+                            "rating":vendor.rating,
+                            "logitude":vendor.longitude,
+                            "latitude":vendor.latitude,
+                            "slug":vendor.slug,
+                            "rating":vendor.rating,
+                            "address":vendor.address,
+                            "food_type":vendor.food_type,
+                            "sitting_available":vendor.sitting_available,
+                            "is_offer":vendor.is_offer,
+                            "maximum_discount":vendor.maximum_discount,
+                            "vendor_image": vendor_image.image_link,
+                            "location_type": vendor.location_type,
+                            "size": vendor.size,
+                            
+                    })
+                
+            paginated_response=paginator.get_paginated_response(response_data)
+            return custom_response(
+                success=True,
+                data=paginated_response,
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            print(e)
+            return custom_response(
+                success=False,
+                message="An error occurred while fetching vendor reviews.",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+class DiscoverLocalVendorsAPI(ListAPIView):
+    permission_classes=[AllowAny]
+    filter_backends=[filters.SearchFilter,DjangoFilterBackend]
+    filterset_fields={
+        "is_offer":["exact"],
+        "food_type":["exact"],
+        "location_type":["exact"],
+        "size":["exact"],
+        "rating":["gte", "lte"],
+        "maximum_discount":["gte", "lte"],
+        "sitting_available":["exact"],
+    }
+    
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            response_data=[]
+            paginator=PaginationSize20()
+            queryset=VendorProfile.objects.filter(is_deleted=False)
+            queryset = self.filter_queryset(queryset)
+            paginated_queryset=paginator.paginate_queryset(queryset,request)
+            
+            for vendor in paginated_queryset:
+                food_items = VendorFoodItem.objects.filter(vendor=vendor, is_deleted=False)[:2]
+                vendor_image = VendorImages.objects.filter(vendor=vendor, is_deleted=False).first()
+                vendor_food_items_serializer = VendorFoodItemsSerializer(food_items, many=True)
+                
+                response_data.append({
+                            "id":vendor.id,
+                            "vendor_name":vendor.vendor_name,
+                            "owner":vendor.owner.first_name+vendor.owner.last_name,
+                            "rating":vendor.rating,
+                            "logitude":vendor.longitude,
+                            "latitude":vendor.latitude,
+                            "slug":vendor.slug,
+                            "rating":vendor.rating,
+                            "address":vendor.address,
+                            "food_type":vendor.food_type,
+                            "sitting_available":vendor.sitting_available,
+                            "is_offer":vendor.is_offer,
+                            "maximum_discount":vendor.maximum_discount,
+                            "vendor_image": vendor_image.image_link,
+                            "location_type": vendor.location_type,
+                            "size": vendor.size,
+                            
+                    })
+                    
+            paginated_response=paginator.get_paginated_response(response_data)
+            return custom_response(
+                success=True,
+                data=paginated_response,
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            print(e)
+            return custom_response(
+                success=False,
+                data=None,
+                status=status.HTTP_400_BAD_REQUEST
+                
+            )
+        
+    
+            
+            
+        
+        
 class VendorReviewsListCreateAPI(APIView):
     permission_classes=[AllowAny]
     def get_object(self, slug):
@@ -399,6 +529,7 @@ class VendorReviewsListCreateAPI(APIView):
             errors=serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+    
         
 class RateVendorAPI(APIView):
     def post(self, request):
@@ -530,6 +661,8 @@ class GetVendorRatingsAPI(APIView):
                 
                 
                 
+    
+    
                 
 
 #vendor-side crud        

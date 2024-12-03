@@ -8,13 +8,15 @@ urlpatterns = [
     path('get-nearby-vendors/', GetNearbyYouVendorsAPI.as_view(),name='nearby-vendors'),
     path('explore-nearby-vendors/', ExploreNearbyVendorsAPI.as_view(),name='nearby-vendors-explore'),
     path('get-vendors-with-offers/', GetVendorWithOffersAPI.as_view(),name='offers'),
-    path('get-vendors-with-offers/explore-more/', ExploreNearbyOffersAPI.as_view(),name='offers-explore'),
     path('get-vendor-profile/<slug>/', GetVendorProfileAPI.as_view(),name='get-vendors-profile'),
     path('get-vendor-food-items/<slug>/', GetVendorFoodItemsAPI.as_view(),name='get-vendors-food-items'),
     path('get-vendor-ratings/<slug>/', GetVendorRatingsAPI.as_view(),name='get-vendors-food-items'),
     path('vendor-reviews/', VendorReviewsListCreateAPI.as_view(),name='vendor-reviews'),
     path('rate-vendor/', RateVendorAPI.as_view(),name='rate-vendor'),
     path('get-vendor-ratings/<slug>/', GetVendorRatingsAPI.as_view(),name='vendor-ratings'),
+    path('get-popular-food-item-vendors/<pk>/', GetPopularFoodItemVendorsList.as_view(),name='get-popular-food-item-vendors-list'),
+    path('discover-local-vendors/', DiscoverLocalVendorsAPI.as_view(),name='discover-local-vendors'),
+    
     
     path('vendor-profile/', VendorProfileDetailView.as_view(),name='vendor-profile'),
     path('vendor-images/', VendorImagesListCreate.as_view(),name='vendor-images'),

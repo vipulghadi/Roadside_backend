@@ -5,6 +5,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.http import Http404
+from django.core.cache import cache
 
 from Roadside_backend.pagination import PaginationSize20
 from Roadside_backend.utils import custom_response
@@ -53,10 +54,33 @@ class GetTop10FoodItemsSuggestionsAPI(APIView):
             )
 
 class GetPopularFoodItemsAPI(APIView):
-    permission_classes=[AllowAny]
+    permission_classes = [AllowAny]
+
     def get(self, request):
+        # Define the cache key
+        cache_key = 'popular_food_items'
+
+        # Try to get data from Redis cache
+        cached_food_items = cache.get(cache_key)
+
+        if cached_food_items:
+            # If data is found in the cache, return it
+            return custom_response(
+                success=True,
+                data=cached_food_items,
+                status=status.HTTP_200_OK
+            )
+
+        # If not in cache, query the database
         food_items = FoodItem.objects.filter(is_deleted=False)[:15]
+
+        # Serialize the food items
         serializer = FoodItemSerializer(food_items, many=True)
+
+        # Cache the food items for 1 hour (3600 seconds)
+        cache.set(cache_key, serializer.data, timeout=3600)
+
+        # Return the data in the response
         return custom_response(
             success=True,
             data=serializer.data,

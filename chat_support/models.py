@@ -5,6 +5,7 @@ from  datetime import datetime
 import string
 import random
 
+
 class ChatAssistantConversationRoom(BaseModel):
     """
     Represents a chat room between a user and an assistant, with optional anonymous mode.
@@ -27,9 +28,10 @@ class ChatAssistantConversationRoom(BaseModel):
     )
     is_anonymous_user = models.BooleanField(
         default=False,
-        help_text="Indicates if the user is anonymous."
+        help_text="Indicates if the user is anonymous.",
+        blank=True,null=True
     )
-    anonymous_user=models.CharField(max_length=255)
+    anonymous_user=models.CharField(max_length=255,null=True,blank=True)
     room_id = models.CharField(
         max_length=255,
         blank=True,
